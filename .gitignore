@@ -1,0 +1,4 @@
+tests/*
+dist/*
+.venv/*
+.DS_Store
