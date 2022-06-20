@@ -1,4 +1,5 @@
-# Scutls: single-cell data processing utility tools
+Scutls: single-cell data processing utility tools
+=================================================
 
 Scutls is a tool package for analyzing single-cell sequencing data.
 
