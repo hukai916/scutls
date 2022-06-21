@@ -4,28 +4,38 @@ import wget
 import os
 from os import path
 import cmd
+import inspect
+import argparse
 
-def download(list_genome_ucsc, list_genome_ensembl, genome_ucsc, genome_ensembl, outdir = "./"):
-    """Download utilities
+def download(list_genome_ucsc = False, list_genome_ensembl = False, genome_ucsc = None, genome_ensembl = None, outdir = "./"):
+    """download subcommand
     Paramters
     ---------
-    flag : str
-        What to perform:
-            genome_ucsc : download genome given UCSC genome name
-            list_genome_ucsc : list all available UCSC genome names
-            genome_ensembl : download genome given ENSEMBL genome name
+
+    list_genome_ucsc : bool
+        list all UCSC genome names
+    list_genome_ensembl : bool
+        list all ENSEMBL genome names
+    genome_ucsc : str
+        download genome given UCSC genome name
+    genome_ensembl : str
+        download genome given ENSEMBL genome name
     outdir : str
-        Output directory
+        output directory, default to "./"
     """
 
-    if (not list_genome_ucsc and not list_genome_ensembl and not genome_ucsc and not genome_ensembl):
-        print("Try: scutls download -h")
+    args = list(locals().keys())
+    args.remove("outdir")
+
+    local = locals()
+    if all(bool(local[key]) is not True for key in args): # use True since args can be either None or False
+        print("scutls download: warning: use 'scutls download -h' for usage")
 
     resources = importlib_resources.files("scutls")
     dict_genome_ucsc = json.loads((resources / "assets" / "genome_ucsc.json").read_bytes()) # https://stackoverflow.com/questions/6028000/how-to-read-a-static-file-from-inside-a-python-package
     dict_genome_ensembl = json.loads((resources / "assets" / "genome_ensembl.json").read_bytes())
 
-    # print available USCS genomes:
+    # print available USCS genomes:ing
     if list_genome_ucsc:
         print("Supported UCSC genomes:")
         cli = cmd.Cmd()
@@ -61,3 +71,16 @@ def download(list_genome_ucsc, list_genome_ensembl, genome_ucsc, genome_ensembl,
                 os.mkdir(outdir)
             wget.download(url, out = outdir)
             print("\nDownloaded to " + path.join(outdir, path.basename(url)) + "!")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--list_genome_ucsc', '-lgu', action='store_true')
+    parser.add_argument('--list_genome_ensembl', '-lge', action='store_true')
+    parser.add_argument('--genome_ucsc', '-gu', type = str)
+    parser.add_argument('--genome_ensembl', '-ge', type = str)
+
+    args = parser.parse_args()
+    download(args.list_genome_ucsc, args.list_genome_ensembl, args.genome_ucsc, args.genome_ensembl, outdir = "./")
+
+if __name__ == "__main__":
+    main()

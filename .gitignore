@@ -3,3 +3,4 @@ dist/*
 .venv/*
 .DS_Store
 scutls/__pycache__/*
+README.dev.md

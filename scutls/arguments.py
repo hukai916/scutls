@@ -1,11 +1,15 @@
 import sys
+import pkg_resources
 from argparse import ArgumentParser
 from scutls import cli
+from scutls.__init__ import __version__
 
 parser = ArgumentParser(description = "Single-cell sequencing utility tools")
+parser.add_argument("-v", "--version", action="version", version="%(prog)s " + str(__version__))
+
 subparsers = parser.add_subparsers(title = "Subcommands")
 
-# download
+# subcommand: download
 parser_download = subparsers.add_parser(
     "download", description = "download genome/annotation file from UCSC/ENSEMBL")
 parser_download.add_argument(
@@ -18,6 +22,7 @@ parser_download.add_argument(
     "--list_genome_ucsc",
     help="list all available UCSC genome names",
     required = False,
+    default = False,
     action='store_true' # quick hack to skip requred input: https://stackoverflow.com/questions/59363298/argparse-expected-one-argument
 )
 parser_download.add_argument(
@@ -25,6 +30,7 @@ parser_download.add_argument(
     "--genome_ucsc",
     help="a UCSC genome name to download",
     required = False,
+    default = None,
     type = str
 )
 parser_download.add_argument(
@@ -32,6 +38,7 @@ parser_download.add_argument(
     "--list_genome_ensembl",
     help="list all available ENSEMBL genome names",
     required = False,
+    default = False,
     action='store_true' # quick hack to skip requred input: https://stackoverflow.com/questions/59363298/argparse-expected-one-argument
 )
 parser_download.add_argument(
@@ -39,6 +46,7 @@ parser_download.add_argument(
     "--genome_ensembl",
     help="an ENSEMBL genome name to download",
     required = False,
+    default = None,
     type = str
 )
 parser_download.set_defaults(func=cli.run_download)
@@ -49,7 +57,6 @@ def main():
         parser.exit()
     else:
         args = parser.parse_args()
-        # sys.setrecursionlimit(200000)
         args.func(args) # parse the args and call whatever function was selected
 
 if __name__ == "__main__":

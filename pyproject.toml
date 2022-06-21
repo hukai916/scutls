@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scutls"
-version = "0.1.1"
+version = "0.1.3"
 description = ""
 authors = ["Your Name <you@example.com>"]
 
@@ -18,3 +18,5 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 scutls = 'scutls.arguments:main'
+
+[tool.poetry_bumpversion.file."scutls/__init__.py"]
