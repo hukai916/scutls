@@ -5,6 +5,7 @@ from Bio import SeqIO, bgzf
 from Bio.Seq import Seq
 from .util import fastq_chunk_interval, fastq_contain_barcode, get_search_pattern, fastq_locate_barcode
 import os
+import regex
 
 def barcode(input = None, output = None, output2 = None, contain = None, locate = None, pos = 0, error = 1, rc_barcode = False, nproc = 1):
     """barcode subcommand
@@ -74,7 +75,8 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
                 SeqIO.write(fastq_hit, output, "fastq")
         else:
             for record in fastq_hit:
-                print(record)
+                print(record.seq, regex.search(barcode_pattern, str(record.seq)))
+                # print(record)
         
         if not output2 == None:
             print("Saving to " + output2 + " ...")
