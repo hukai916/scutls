@@ -216,7 +216,7 @@ def get_search_pattern(pattern, error, rc_barcode):
 def fastq_locate_barcode(interval, fastq, barcode_pattern, pos = 0):
     """
     pos: which match to return: use 0 for the first match, use -1 for the last match.
-    The return value will be: record.id match_location_0_based
+    The return value will be: record.id match_location_0_based len(record.seq)s
     
     """
     res = []
@@ -228,9 +228,9 @@ def fastq_locate_barcode(interval, fastq, barcode_pattern, pos = 0):
                 pos_start = [match.start() for match in matches]
         
                 if not len(pos_start) == 0:
-                    res.append([record.id, pos_start[pos]])
+                    res.append([record.id, pos_start[pos], len(record.seq)])
                 else:
-                    res.append([record.id, "NA"])
+                    res.append([record.id, "NA", len(record.seq)])
     return(res)
 
 if __name__ == "__main__":

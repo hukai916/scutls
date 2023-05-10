@@ -76,8 +76,6 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
         else:
             for record in fastq_hit:
                 print(record.seq, [x.start() for x in regex.finditer(barcode_pattern, str(record.seq))])
-                print()
-                # print(record)
         
         if not output2 == None:
             print("Saving to " + output2 + " ...")
@@ -107,8 +105,8 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
                 pos = pos),
                 intervals.values()).get()
         for res in res_list:
-            for res_pair in res:
-                print(res_pair[0], res_pair[1])
+            for res_items in res:
+                print(res_items[0], res_items[1], res_items[2])
 
 
 def main():
