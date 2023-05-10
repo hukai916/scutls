@@ -76,6 +76,7 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
         else:
             for record in fastq_hit:
                 print(record.seq, regex.search(barcode_pattern, str(record.seq)))
+                print()
                 # print(record)
         
         if not output2 == None:
