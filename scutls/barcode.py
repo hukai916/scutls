@@ -75,7 +75,7 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
                 SeqIO.write(fastq_hit, output, "fastq")
         else:
             for record in fastq_hit:
-                print(record.seq, [x for x in regex.finditer(barcode_pattern, str(record.seq))])
+                print(record.seq, [x.start() for x in regex.finditer(barcode_pattern, str(record.seq))])
                 print()
                 # print(record)
         
