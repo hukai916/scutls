@@ -192,7 +192,7 @@ def fastq_contain_barcode(interval, fastq, barcode_pattern):
     with _open(fastq) as f:
         for i, record in enumerate(SeqIO.parse(f, "fastq")):
             if i in interval:
-                print("test: ", [regex.search(barcode_pattern, str(record.seq))])
+                print("test: ", [regex.search(barcode_pattern, str(record.seq))], len([regex.search(barcode_pattern, str(record.seq))]))
                 print("test2:", [x for x in regex.finditer(barcode_pattern, str(record.seq))])
                 
                 if regex.search(barcode_pattern, str(record.seq)):
