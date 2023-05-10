@@ -64,6 +64,9 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
             fastq_hit = fastq_hit + [hit for hit in res[x][0]]
             fastq_non_hit = fastq_non_hit + [non_hit for non_hit in res[x][1]]
 
+        for x in fastq_hit:
+            print(x)
+
         if not output == None:
             if not os.path.dirname(output) == "":
                 os.makedirs(os.path.dirname(output), exist_ok=True)
