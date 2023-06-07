@@ -1,0 +1,4 @@
+1. scutls fastq -rc -only_if_contain -e
+    - -rc: output reverse complemented reads
+    - -only_if_contain: only reverse complement if reads contain certain sequence
+    - -e: allowed error when searching for -only_if_contain 

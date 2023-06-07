@@ -4,13 +4,13 @@ from Bio.Seq import Seq
 from .util import _open
 import os
 
-def fastq(input = None, output = None, unique = None, join = None):
+def fastq(input = None, output = None, unique = None, join = None, rc = None, nproc = 1):
     """fastq subcommand
     Paramters
     ---------
 
     input : str
-        output file name, auto detects .gz
+        input file name, auto detects .gz
     output : str
         output file name, auto detects .gz
     unique : str
@@ -18,6 +18,13 @@ def fastq(input = None, output = None, unique = None, join = None):
     join : str
         fastq file name to join to the input fastq, auto detects .gz
             "join" means to append each read to corresponding lines in input, not "cat"
+    nproc: int
+        number of parallel jobs, default to 1
+        funtions that support nproc: rc
+
+    # TODO:
+    rc : str
+        boolean, to reverse complement the reads, supports multi-processing
 
     """
 
@@ -48,7 +55,6 @@ def fastq(input = None, output = None, unique = None, join = None):
         print("Done!")
 
     # join fastq file to input fastq if "-j":
-        # make fastq file unique:
     if join:
         print("Saving to " + output + " ...")
 
@@ -87,6 +93,8 @@ def fastq(input = None, output = None, unique = None, join = None):
         f_out.close()
         print("Done!")
 
+    # reverse complement fastq if "-rc":
+    # todo
 
 def main():
     parser = argparse.ArgumentParser()

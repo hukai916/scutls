@@ -206,6 +206,9 @@ def get_search_pattern(pattern, error, rc_barcode):
     else:
         barcode_pattern = ""
         barcodes = pattern.split(",")
+        if rc_barcode:
+            barcodes = barcodes[::-1]
+            
         for barcode in barcodes:
             if rc_barcode:
                 pattern = str(Seq(pattern).reverse_complement())

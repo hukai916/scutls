@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scutls"
-version = "0.2.0"
+version = "0.2.1"
 description = "Single-cell data processing utility tools"
 authors = ["Kai Hu <kai.hu@umassmed.edu>"]
 

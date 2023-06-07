@@ -13,7 +13,7 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
     ---------
 
     input : str
-        output file name, auto detects .gz
+        input file name, auto detects .gz
     output : str
         output file name, auto detects .gz, contains fastq that contains specified barcode via contain
     contain: str
@@ -45,6 +45,8 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
     if contain:
         # prepare search pattern
         barcode_pattern = get_search_pattern(pattern = contain, error = error, rc_barcode = rc_barcode)
+        
+        print("barcode_pattern: ", barcode_pattern)
 
         # multiprocessing
         if not output == None:
