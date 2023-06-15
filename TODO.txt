@@ -2,3 +2,6 @@
     - -rc: output reverse complemented reads
     - -only_if_contain: only reverse complement if reads contain certain sequence
     - -e: allowed error when searching for -only_if_contain 
+2. scutls barcode -e
+    - if -e is 0~1, treat it as percentage and calculate allowed error automatically by multipying the barcode 1h_full_length_read
+    - add -s option in addition to -e, which means that only substitutions are allowed not error.

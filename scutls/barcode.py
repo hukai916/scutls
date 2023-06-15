@@ -46,7 +46,7 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
         # prepare search pattern
         barcode_pattern = get_search_pattern(pattern = contain, error = error, rc_barcode = rc_barcode)
         
-        print("barcode_pattern: ", barcode_pattern)
+        # print("barcode_pattern: ", barcode_pattern)
 
         # multiprocessing
         if not output == None:

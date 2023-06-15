@@ -211,8 +211,10 @@ def get_search_pattern(pattern, error, rc_barcode):
             
         for barcode in barcodes:
             if rc_barcode:
-                pattern = str(Seq(pattern).reverse_complement())
-            barcode_pattern += "(" + barcode + "){e<=" + str(error) + "}(.*?)"
+                pattern = str(Seq(barcode).reverse_complement())
+            else:
+                pattern = barcode
+            barcode_pattern += "(" + pattern + "){e<=" + str(error) + "}(.*?)"
     return(barcode_pattern)
 
 # obtain fastq coordinates for specified barcode
