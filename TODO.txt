@@ -7,4 +7,4 @@
     - add -s option in addition to -e, which means that only substitutions are allowed not error.
 3. scutls fasta --range 
     - to cut out specified range out of a fasta file 
-    - smiliar for fastq?
+    - smiliar for fastq
