@@ -1,10 +1,10 @@
 import argparse
 from Bio import SeqIO, bgzf
 from Bio.Seq import Seq
-from .util import _open
+from .util import _open, _open_out
 import os
 
-def fastq(input = None, output = None, unique = None, join = None, rc = None, nproc = 1):
+def fastq(input = None, output = None, unique = None, join = None, filter_q = None, rc = None, nproc = 1):
     """fastq subcommand
     Paramters
     ---------
@@ -14,10 +14,12 @@ def fastq(input = None, output = None, unique = None, join = None, rc = None, np
     output : str
         output file name, auto detects .gz
     unique : str
-        output unique fastq records by record ID
+        output unique fastq records by record ID (some bam coverted fastq may have records with duplicated IDs)
     join : str
         fastq file name to join to the input fastq, auto detects .gz
             "join" means to append each read to corresponding lines in input, not "cat"
+    filter_q : int
+        split reads into reads with mean_quality higher than filter_q, also output the reads failed to pass the filter into no_pass_xxx.fastq.gz.
     nproc: int
         number of parallel jobs, default to 1
         funtions that support nproc: rc
@@ -40,6 +42,7 @@ def fastq(input = None, output = None, unique = None, join = None, rc = None, np
 
         if not os.path.dirname(output) == "":
             os.makedirs(os.path.dirname(output), exist_ok=True)
+ 
         with _open(input) as f:
             unique_records = {}
             for record in SeqIO.parse(f, 'fastq'):
@@ -93,6 +96,27 @@ def fastq(input = None, output = None, unique = None, join = None, rc = None, np
         f_out.close()
         print("Done!")
 
+    # filter reads based on mean quality cutoff if "-fq":
+    if filter_q:
+        filter_q = int(filter_q)
+        if not os.path.dirname(output) == "":
+            os.makedirs(os.path.dirname(output), exist_ok=True)
+        
+        output2 = os.path.join(os.path.dirname(output), "not_pass_" + os.path.basename(output))
+        print("Saving to " + output + " ...")
+        print("Saving to " + output2 + " ...")
+
+        with _open(input) as f, _open_out(output) as f_out, _open_out(output2) as f_out2:
+            for record in SeqIO.parse(f, "fastq"):
+                mean_quality = sum(record.letter_annotations["phred_quality"]) / len(record)
+                if mean_quality >= filter_q:
+                    SeqIO.write(record, f_out, "fastq")
+                else:
+                    SeqIO.write(record, f_out2, "fastq")
+                    
+        print("Done!")
+
+    
     # reverse complement fastq if "-rc":
     # todo
 

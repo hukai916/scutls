@@ -147,7 +147,12 @@ def _open(filename):
     encoding = guess_type(filename)[1]  # uses file extension
     _open = partial(gzip.open, mode='rt') if encoding == 'gzip' else open
     return(_open(filename))
-
+# _open_out function that can handle SeqIO writing to gz or fastq
+def _open_out(filename):
+    encoding = guess_type(filename)[1]
+    _open_out = partial(gzip.open, mode='wt') if encoding == 'gzip' else open
+    return(_open_out(filename))
+    
 # find the closing number for chunking fastq file
 def closest_number(n, m):
     """
@@ -198,11 +203,16 @@ def fastq_contain_barcode(interval, fastq, barcode_pattern):
     return([fastq_hit, fastq_non_hit])
 
 # obtain search pattern given string pattern and allowed mismatches (error)
-def get_search_pattern(pattern, error, rc_barcode):
+def get_search_pattern(pattern, error, mismatch_only, rc_barcode):
+    if mismatch_only:
+        error_pattern = "){s<="
+    else:
+        error_pattern = "){e<="
+    
     if not "," in pattern:
         if rc_barcode:
             pattern = str(Seq(pattern).reverse_complement())
-        barcode_pattern = "(" + pattern + "){e<=" + str(error) + "}"
+        barcode_pattern = "(" + pattern + error_pattern + str(error) + "}"
     else:
         barcode_pattern = ""
         barcodes = pattern.split(",")
@@ -214,7 +224,7 @@ def get_search_pattern(pattern, error, rc_barcode):
                 pattern = str(Seq(barcode).reverse_complement())
             else:
                 pattern = barcode
-            barcode_pattern += "(" + pattern + "){e<=" + str(error) + "}(.*?)"
+            barcode_pattern += "(" + pattern + error_pattern + str(error) + "}(.*?)"
     return(barcode_pattern)
 
 # obtain fastq coordinates for specified barcode
@@ -225,18 +235,21 @@ def fastq_locate_barcode(interval, fastq, barcode_pattern, pos = 0):
     
     """
     res = []
+
     with _open(fastq) as f:
         for i, record in enumerate(SeqIO.parse(f, "fastq")):
             if i in interval:
                 matches = regex.finditer(barcode_pattern, str(record.seq))
                 # tem = [match for match in matches]
                 pos_start = [match.start() for match in matches]
-        
                 if not len(pos_start) == 0:
                     res.append([record.id, pos_start[pos], len(record.seq)])
                 else:
                     res.append([record.id, "NA", len(record.seq)])
     return(res)
+
+# if containing the following characters, the pattern will be passed directly to regex:
+special_search_character = ["{", "}", "(", ")", "*", "="]
 
 if __name__ == "__main__":
     update_ensembl_release()

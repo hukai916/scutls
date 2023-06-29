@@ -115,6 +115,11 @@ parser_fastq_group.add_argument(
     help = "append each read from --join fastq to corresponding line in --input fastq, not 'cat'; the read count and id must be the same in the two fastq files",
     required = False, type = str, default = None
 )
+parser_fastq_group.add_argument(
+    "-fq", "--filter_q",
+    help = "filter reads based on mean read quality cutoff (--filter_q). Default to 25. Reads failed to pass this filter will be saved into no_pass_xxx.fastq.gz where xxx represents the name specified with --output flag.",
+    required = False, type = int, default = 25
+)
 ## set default values
 parser_fastq.set_defaults(func = cli.run_fastq)
 
@@ -161,11 +166,17 @@ parser_barcode.add_argument(
     required = False, type = int, default = 1
 )
 parser_barcode.add_argument(
+    "-m", "--mismatch_only",
+    help = "exclude INDELs when searching for barcode string",
+    required = False, default = False, 
+    action = 'store_true'
+)
+parser_barcode.add_argument(
     "-rcb", "--rc_barcode", 
     help = "reverse complement the barcode before searching",
     required = False,
     default = False,
-    action='store_true' # quick hack to skip requred input: https://stackoverflow.com/questions/59363298/argparse-expected-one-argument
+    action = 'store_true' # quick hack to skip requred input: https://stackoverflow.com/questions/59363298/argparse-expected-one-argument
 )
 parser_barcode.add_argument(
     "-nproc", "--num_processor",

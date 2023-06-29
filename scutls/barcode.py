@@ -3,11 +3,11 @@ import functools
 from multiprocessing import Pool
 from Bio import SeqIO, bgzf
 from Bio.Seq import Seq
-from .util import fastq_chunk_interval, fastq_contain_barcode, get_search_pattern, fastq_locate_barcode
+from .util import fastq_chunk_interval, fastq_contain_barcode, get_search_pattern, fastq_locate_barcode, special_search_character
 import os
 import regex
 
-def barcode(input = None, output = None, output2 = None, contain = None, locate = None, pos = 0, error = 1, rc_barcode = False, nproc = 1):
+def barcode(input = None, output = None, output2 = None, contain = None, locate = None, pos = 0, error = 1, mismatch_only = False, rc_barcode = False, nproc = 1):
     """barcode subcommand
     Paramters
     ---------
@@ -17,17 +17,19 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
     output : str
         output file name, auto detects .gz, contains fastq that contains specified barcode via contain
     contain: str
-        barcode to detect, if multiple barcode, separate with comma: "AATTCCC,AGGGCCC,CCGGCG"
+        barcode to detect, if multiple barcodess, separate with comma: "AATTCCC,AGGGCCC,CCGGCG", if pattern contains special characters including "()", "{}", "*", "=", the pattern will be passed as searching pattern
         # optional for "contain" sub-command:
         error: int
-            allowed nucleotide mismatches (can be INDELs) when aligning, default to 1
+            allowed nucleotide mismatches (can be INDELs) when searching regex pattern, default to 1
+        mismatch_only: bool
+            if true, only mismatches (INDELs excluded) are allowed when searching regex pattern, default to False
         nproc: int
             number of parallel jobs, default to 1
         rc_barcode: bool
             take reverse complement of the barcode when aligning, default to False
     locate: str
         barcode to detect its location in reads
-        # shared arguments with "contain": error, nproc, rc_barcode
+        # shared arguments with "contain": error, mismatch_only, nproc, rc_barcode
         pos: int
             which matched position to return, default to 0 meaning the first, use -1 to indicate the last.
         
@@ -44,7 +46,12 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
     # check if input fastq contains specified barcode:
     if contain:
         # prepare search pattern
-        barcode_pattern = get_search_pattern(pattern = contain, error = error, rc_barcode = rc_barcode)
+        for character in special_search_character:
+            if character in contain:
+                barcode_pattern = contain 
+                break
+            else:
+                barcode_pattern = get_search_pattern(pattern = contain, error = error, mismatch_only = mismatch_only, rc_barcode = rc_barcode)
         
         # print("barcode_pattern: ", barcode_pattern)
 
@@ -94,7 +101,12 @@ def barcode(input = None, output = None, output2 = None, contain = None, locate 
     # check if input fastq contains specified barcode
     if locate:
         # prepare search pattern
-        barcode_pattern = get_search_pattern(pattern = locate, error = error, rc_barcode = rc_barcode)
+        for character in special_search_character:
+            if character in locate:
+                barcode_pattern = locate 
+                break
+        else:
+            barcode_pattern = get_search_pattern(pattern = locate, error = error, mismatch_only = mismatch_only, rc_barcode = rc_barcode)
 
         # multiprocessing
         intervals = fastq_chunk_interval(input, nproc = nproc)
@@ -121,6 +133,7 @@ def main():
     parser.add_argument('--position', '-p', type = int)
     
     parser.add_argument('--error',   '-e', type   = int)
+    parser.add_argument('--mismatch_only', '-m', default = False)
     parser.add_argument('--rc_barcode', '-rcb', default = False)
     parser.add_argument('--num_processor', '-nproc', default = 1)
     

@@ -21,7 +21,8 @@ def run_fastq(args):
     input  = args.input,
     output = args.output,
     unique = args.unique,
-    join   = args.join
+    join   = args.join,
+    filter_q = args.filter_q
     )
 
 def run_barcode(args):
@@ -33,6 +34,7 @@ def run_barcode(args):
     locate = args.locate,
     pos = args.position,
     error   = args.error,
+    mismatch_only = args.mismatch_only,
     rc_barcode = args.rc_barcode,
     nproc = args.num_processor # must use full name
     )
