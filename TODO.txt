@@ -8,3 +8,6 @@
 3. scutls fasta --range 
     - to cut out specified range out of a fasta file 
     - smiliar for fastq
+4. scutls bam --range  
+    - to output reads that span the specified range of the reference 
+    

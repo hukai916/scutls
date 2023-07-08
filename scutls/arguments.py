@@ -123,6 +123,33 @@ parser_fastq_group.add_argument(
 ## set default values
 parser_fastq.set_defaults(func = cli.run_fastq)
 
+# sub-command: bam
+parser_bam = subparsers.add_parser(
+    "bam", description = "process bam files")
+parser_bam.add_argument(
+    "-i", "--input",
+    help = "input bam, must end with .bam",
+    required = True, type = str, default = None
+)
+parser_bam.add_argument(
+    "-o", "--output",
+    help = "output file name",
+    required = False, type = str, default = None
+)
+parser_bam.add_argument(
+    "-nproc", "--num_processor",
+    help = "number of parallel jobs",
+    required = False, type = int, default = 1
+)
+parser_bam.add_argument(
+    "-lpir", "--locate_pos_in_read",
+    help = "reference coordinate to be located in each read",
+    required = False, type = int, default = 1
+)
+## add mutually exclusive groups
+## set default values
+parser_bam.set_defaults(func = cli.run_bam)
+
 # sub-command: barcode
 parser_barcode = subparsers.add_parser(
     "barcode", description = "handle barcode file")
@@ -140,8 +167,6 @@ parser_barcode.add_argument(
     help = "output fastq name for non-hit reads, can end with .gz",
     required = False, type = str, default = None
 )
-
-
 ## add mutually exclusive groups
 parser_barcode_group = parser_barcode.add_mutually_exclusive_group()
 parser_barcode_group.add_argument(

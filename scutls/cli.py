@@ -1,6 +1,7 @@
-from scutls import download, fastq, barcode
+from scutls import download, fastq, barcode, bam
 
 # the default values are specified via the arguments.py file
+# should use full argument name for both left and right side
 
 def run_download(args):
     download.download(
@@ -23,6 +24,14 @@ def run_fastq(args):
     unique = args.unique,
     join   = args.join,
     filter_q = args.filter_q
+    )
+
+def run_bam(args):
+    bam.bam(
+    input  = args.input,
+    output = args.output,
+    locate_pos_in_read = args.locate_pos_in_read,
+    nproc = args.num_processor
     )
 
 def run_barcode(args):

@@ -10,6 +10,8 @@ import math
 from Bio import SeqIO
 from Bio.Seq import Seq
 import regex
+import os 
+import pysam
 
 # helper function to perform sort
 def num_sort(test_string):
@@ -250,6 +252,99 @@ def fastq_locate_barcode(interval, fastq, barcode_pattern, pos = 0):
 
 # if containing the following characters, the pattern will be passed directly to regex:
 special_search_character = ["{", "}", "(", ")", "*", "="]
+
+# calculate CIGAR consumption, used for "scutls bam --locate_pos_in_read"
+def cigar_consume(cigar_tuple):
+    """_calculate the query and reference consumption given cigar_tuple, return tuple (query_consumed, ref_consumed)_
+    
+    Ref: https://samtools.github.io/hts-specs/SAMv1.pdf
+    
+    M 0 alignment match (can be a sequence match or mismatch) yes yes
+    I 1 insertion to the reference yes no
+    D 2 deletion from the reference no yes
+    N 3 skipped region from the reference no yes
+    S 4 soft clipping (clipped sequences present in SEQ) yes no
+    H 5 hard clipping (clipped sequences NOT present in SEQ) no no
+    P 6 padding (silent deletion from padded reference) no no
+    = 7 sequence match yes yes
+    X 8 sequence mismatch yes yes
+
+    Args:
+        cigar_tuple (_tuple_): _CIGAR tuple_
+    """
+    
+    if cigar_tuple[0] == 0:
+        return((cigar_tuple[1], cigar_tuple[1]))
+    elif cigar_tuple[0] == 1: 
+        return((cigar_tuple[1], 0))
+    elif cigar_tuple[0] == 2: 
+        return((0, cigar_tuple[1]))
+    elif cigar_tuple[0] == 3: 
+        return((0, cigar_tuple[1]))
+    elif cigar_tuple[0] == 4: 
+        return((cigar_tuple[1], 0))
+    elif cigar_tuple[0] == 5: 
+        return((0, 0))
+    elif cigar_tuple[0] == 6: 
+        return((0, 0))
+    elif cigar_tuple[0] == 7: 
+        return((cigar_tuple[1], cigar_tuple[1]))
+    elif cigar_tuple[0] == 8:
+        return((cigar_tuple[1], cigar_tuple[1]))
+    else:
+        print("wrong CIGAR!")
+        exit()
+
+# obtain bam chunk intervals for multiprocessing
+def bam_chunk_interval(bam, nproc = 1):
+    index_file_path = bam + '.bai'
+    if not os.path.exists(index_file_path):
+        pysam.index(bam)
+    with pysam.AlignmentFile(bam, 'rb') as bam_file:
+        n1 = sum(1 for alignment in bam_file)
+    chunk_size = math.ceil(n1 / nproc)
+    intervals = list(chunks(range(0, n1), chunk_size))
+    intervals = {i: intervals[i] for i in range(0, len(intervals))}
+    return(intervals)
+
+# locate the read site position for given ref coordinate for each interval
+def bam_locate_pos_in_read(interval, bam, ref_coordinate):
+    res = []
+    with pysam.AlignmentFile(bam, 'rb') as bam_file:
+        for i, alignment in enumerate(bam_file):
+            if i in interval:
+                if alignment.reference_start > ref_coordinate:
+                    # alignment does not span ref_pos
+                    res.append(alignment.query_name + ",NA")
+                elif alignment.reference_start == ref_coordinate:
+                    res.append(alignment.query_name + "," + str(alignment.query_alignment_start))
+                else:
+                    ref_pos  = alignment.reference_start
+                    read_pos = alignment.query_alignment_start
+                    for i, v in enumerate(alignment.cigartuples):
+                        query_consume, ref_consume = cigar_consume(v)
+                        ref_pos_tem = ref_pos + ref_consume 
+                        read_pos_tem = read_pos + query_consume
+                        
+                        if ref_pos_tem < ref_coordinate:
+                            ref_pos = ref_pos_tem
+                            read_pos = read_pos_tem
+                        elif ref_pos_tem >= ref_coordinate:
+                            if read_pos == read_pos_tem:
+                                res.append(alignment.query_name + "," + str(read_pos))
+                                break
+                            else:
+                                if ref_pos_tem - ref_pos == read_pos_tem - read_pos:
+                                    # the last checked CIGAR tuple must be M
+                                    read_pos_site = read_pos + (ref_coordinate - ref_pos)
+                                    assert read_pos_site == read_pos_tem - (ref_pos_tem - ref_coordinate), "error 1"
+                                    res.append(alignment.query_name + "," + str(read_pos_site))
+                                    break
+                                else:
+                                    # the last checked CIGAR tuple must be D, and already covered since read_pos must == read_pos_tem
+                                    res.append(alignment.query_name + ",invalid")
+                                    break
+    return(res)
 
 if __name__ == "__main__":
     update_ensembl_release()
