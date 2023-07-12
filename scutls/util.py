@@ -154,7 +154,7 @@ def _open_out(filename):
     encoding = guess_type(filename)[1]
     _open_out = partial(gzip.open, mode='wt') if encoding == 'gzip' else open
     return(_open_out(filename))
-    
+
 # find the closing number for chunking fastq file
 def closest_number(n, m):
     """
@@ -176,9 +176,12 @@ def closest_number(n, m):
         n2 += m
     return n2
 
-# ensure chunk_size is a fold of 4
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
+    # handle edge case: zero lst
+    if len(lst) == 0:
+        return(lst)
+    
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
@@ -302,6 +305,7 @@ def bam_chunk_interval(bam, nproc = 1):
         pysam.index(bam)
     with pysam.AlignmentFile(bam, 'rb') as bam_file:
         n1 = sum(1 for alignment in bam_file)
+        
     chunk_size = math.ceil(n1 / nproc)
     intervals = list(chunks(range(0, n1), chunk_size))
     intervals = {i: intervals[i] for i in range(0, len(intervals))}

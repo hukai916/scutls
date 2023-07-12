@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from scutls import cli
 from scutls.__init__ import __version__
 
-parser = ArgumentParser(description = "Single-cell sequencing utility tools")
+parser = ArgumentParser(description = "Single-cell sequencing utility tool")
 parser.add_argument("-v", "--version", action="version", version="%(prog)s " + str(__version__))
 
 subparsers = parser.add_subparsers(title = "Subcommands")
