@@ -324,12 +324,13 @@ def bam_locate_pos_in_read(interval, bam, ref_coordinate):
                     res.append(alignment.query_name + "," + str(alignment.query_alignment_start))
                 else:
                     ref_pos  = alignment.reference_start
-                    read_pos = alignment.query_alignment_start
+                    # read_pos = alignment.query_alignment_start # soft clip also consume query, will double count if set like this
+                    read_pos = 0
                     for i, v in enumerate(alignment.cigartuples):
                         query_consume, ref_consume = cigar_consume(v)
                         ref_pos_tem = ref_pos + ref_consume 
                         read_pos_tem = read_pos + query_consume
-                        
+
                         if ref_pos_tem < ref_coordinate:
                             ref_pos = ref_pos_tem
                             read_pos = read_pos_tem
