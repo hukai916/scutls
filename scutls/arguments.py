@@ -141,12 +141,18 @@ parser_bam.add_argument(
     help = "number of parallel jobs",
     required = False, type = int, default = 1
 )
-parser_bam.add_argument(
+## add mutually exclusive groups
+parser_bam_group = parser_bam.add_mutually_exclusive_group()
+parser_bam_group.add_argument(
     "-lpir", "--locate_pos_in_read",
     help = "reference coordinate to be located in each read",
-    required = False, type = int, default = 1
+    required = False, type = int, default = None
 )
-## add mutually exclusive groups
+parser_bam_group.add_argument(
+    "-lpiref", "--locate_pos_in_ref",
+    help = "find out the coordinates in reference for each cigar tuple for each read, output will be like: read_id,cigar_char,cigar_char_length,ref_pos",
+    required = False, action = 'store_true', default = False
+)
 ## set default values
 parser_bam.set_defaults(func = cli.run_bam)
 

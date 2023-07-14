@@ -256,6 +256,18 @@ def fastq_locate_barcode(interval, fastq, barcode_pattern, pos = 0):
 # if containing the following characters, the pattern will be passed directly to regex:
 special_search_character = ["{", "}", "(", ")", "*", "="]
 
+# map cigar number to letter
+cigar_num2char = {}
+cigar_num2char[0] = "M"
+cigar_num2char[1] = "I"
+cigar_num2char[2] = "D"
+cigar_num2char[3] = "N"
+cigar_num2char[4] = "S"
+cigar_num2char[5] = "H"
+cigar_num2char[6] = "P"
+cigar_num2char[7] = "="
+cigar_num2char[8] = "X"
+
 # calculate CIGAR consumption, used for "scutls bam --locate_pos_in_read"
 def cigar_consume(cigar_tuple):
     """_calculate the query and reference consumption given cigar_tuple, return tuple (query_consumed, ref_consumed)_
@@ -350,6 +362,23 @@ def bam_locate_pos_in_read(interval, bam, ref_coordinate):
                                     res.append(alignment.query_name + ",invalid")
                                     break
     return(res)
+
+# locate for each cigar tuple the corresponding reference coordinate for each read
+def bam_locate_pos_in_ref(interval, bam):
+    res = []
+    with pysam.AlignmentFile(bam, 'rb') as bam_file:
+        for i, alignment in enumerate(bam_file):
+            if i in interval:
+                ref_pos  = alignment.reference_start
+                read_pos = 0
+                for i, v in enumerate(alignment.cigartuples):
+                    res.append(",".join([alignment.query_name, cigar_num2char[v[0]], str(v[1]), str(ref_pos)]))
+                    
+                    query_consume, ref_consume = cigar_consume(v)
+                    ref_pos = ref_pos + ref_consume 
+                    read_pos = read_pos + query_consume
+    return(res)
+
 
 if __name__ == "__main__":
     update_ensembl_release()

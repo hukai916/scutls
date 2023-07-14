@@ -31,6 +31,7 @@ def run_bam(args):
     input  = args.input,
     output = args.output,
     locate_pos_in_read = args.locate_pos_in_read,
+    locate_pos_in_ref = args.locate_pos_in_ref,
     nproc = args.num_processor
     )
 
